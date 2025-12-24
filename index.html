@@ -450,21 +450,45 @@
     </style>
 </head>
 <body>
-    <!-- Header Section with Video Background -->
+    
     <section class="header-section">
-        <video class="video-background" autoplay muted loop playsinline>
-            <source src="IMG_0341.mp4" type="video/mp4">
-            <!-- Fallback image if video doesn't load -->
-            <img src="background-image.jpg" alt="Background" style="width: 100%; height: 100%; object-fit: cover;">
-        </video>
-        <div class="header-overlay"></div>
-        <div class="header-content">
-            <h1>Мы будем рады видеть тебя на нашей свадьбе!</h1>
-            <p style="font-size: clamp(1rem, 3vw, 1.8rem); margin-top: 20px;">Денис и Александра</p>
-            <p style="font-size: clamp(0.9rem, 2.5vw, 1.5rem); margin-top: 10px;">28 июля 2026 года</p>
-        </div>
-        <div class="scroll-indicator">↓</div>
-    </section>
+  <video id="bgVideo" autoplay muted loop playsinline preload="auto" class="video-background">
+    <source src="IMG_0341.mp4" type="video/mp4">
+    Ваш браузер не поддерживает видео.
+  </video>
+
+  <div class="header-overlay"></div>
+
+  <div class="header-content">
+    <h1>Мы будем рады видеть тебя на нашей свадьбе!</h1>
+    <p>Денис и Александра</p>
+    <p>28 июля 2026 года</p>
+  </div>
+
+  <div class="scroll-indicator">↓</div>
+</section>
+
+<script>
+  const video = document.getElementById('bgVideo');
+
+  video.play().catch(() => {
+    console.log('Автоплей заблокирован, ждем взаимодействия пользователя');
+  });
+
+  document.addEventListener('click', () => {
+    if(video.paused){
+      video.play();
+    }
+  });
+
+  document.querySelector('.scroll-indicator').addEventListener('click', function() {
+    document.querySelector('#location-timeline').scrollIntoView({ behavior: 'smooth' });
+    
+    if(video.paused){
+      video.play();
+    }
+  });
+</script>
 
     <!-- Location and Timeline Section -->
     <section class="section" id="location-timeline">
