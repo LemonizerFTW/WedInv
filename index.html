@@ -453,7 +453,10 @@
     <!-- Header Section with Video Background -->
     <section class="header-section">
         <!-- Видео на фоне -->
-        <video id="bgVideo" autoplay muted loop playsinline preload="auto" class="video-background">
+        <video id="bgVideo" autoplay muted loop playsinline preload="auto" class="video-background" webkit-playsinline>
+            <source src="./IMG_0341.MP4" type="video/mp4">
+            <source src="IMG_0341.MP4" type="video/mp4">
+            <source src="./IMG_0341.mp4" type="video/mp4">
             <source src="IMG_0341.mp4" type="video/mp4">
             Ваш браузер не поддерживает видео.
         </video>
@@ -628,7 +631,7 @@
             }
         }
 
-        // Prefill form fields from URL parameters
+        // Prefill form fields from URL parameters and initialize video
         window.addEventListener('DOMContentLoaded', function() {
             const nameParam = getURLParameter('name');
             const nameField = document.getElementById('name');
@@ -654,24 +657,62 @@
             
             // Initial check
             checkFormValidity();
-        });
 
-        // Video autoplay handling
-        const video = document.getElementById('bgVideo');
+            // Video autoplay handling - улучшенная версия
+            const video = document.getElementById('bgVideo');
 
-        // Попытка запустить видео программно
-        if (video) {
-            video.play().catch(() => {
-                console.log('Автоплей заблокирован, ждем взаимодействия пользователя');
-            });
-
-            // Гарантированный запуск видео при первом клике или тапе (для мобильных)
-            document.addEventListener('click', () => {
-                if (video.paused) {
-                    video.play();
+            if (video) {
+                // Функция для запуска видео
+                function playVideo() {
+                    if (video && video.paused) {
+                        const playPromise = video.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.log('Автоплей заблокирован:', error);
+                            });
+                        }
+                    }
                 }
-            });
-        }
+
+                // Попытка запуска при различных событиях загрузки
+                video.addEventListener('loadeddata', playVideo);
+                video.addEventListener('canplay', playVideo);
+                video.addEventListener('canplaythrough', playVideo);
+                video.addEventListener('loadedmetadata', playVideo);
+
+                // Попытка запустить сразу после небольшой задержки
+                setTimeout(playVideo, 100);
+
+                // Гарантированный запуск видео при первом взаимодействии пользователя
+                const userInteractionEvents = ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'];
+                let hasInteracted = false;
+
+                userInteractionEvents.forEach(eventType => {
+                    document.addEventListener(eventType, function() {
+                        if (!hasInteracted) {
+                            hasInteracted = true;
+                            playVideo();
+                        }
+                    }, { once: true });
+                });
+
+                // Также запускаем при любом клике/тапе
+                document.addEventListener('click', playVideo);
+                document.addEventListener('touchstart', playVideo, { passive: true });
+
+                // Обработка ошибок загрузки
+                video.addEventListener('error', function(e) {
+                    console.error('Ошибка загрузки видео:', e);
+                    console.log('Проверьте путь к файлу: IMG_0341.MP4');
+                    console.log('Текущий src:', video.currentSrc || video.src);
+                });
+
+                // Логирование для отладки
+                video.addEventListener('loadstart', () => console.log('Видео начало загружаться'));
+                video.addEventListener('loadeddata', () => console.log('Видео данные загружены'));
+                video.addEventListener('canplay', () => console.log('Видео готово к воспроизведению'));
+            }
+        });
 
         // Плавная прокрутка вниз
         document.querySelector('.scroll-indicator').addEventListener('click', function() {
@@ -680,8 +721,9 @@
             });
             
             // На мобильных сразу включаем видео при взаимодействии
+            const video = document.getElementById('bgVideo');
             if (video && video.paused) {
-                video.play();
+                video.play().catch(() => {});
             }
         });
 
